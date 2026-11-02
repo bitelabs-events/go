@@ -63,8 +63,10 @@ footer{margin-top:16px;color:#7a8394;font-size:.85rem}
     return d.toLocaleString("en-GB", { timeZone: "Europe/London", day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit", timeZoneName: "short" });
   }
   function pct(n, t) { return t > 0 ? (n / t * 100).toFixed(1) + "%" : "0.0%"; }
+  var last = 0;
   function refresh() {
-    if (busy) return; busy = true;
+    // Abacus allows 30 requests per 10 seconds per IP (shared with clicks on the short links), so never refresh more than once every 10 seconds.
+    if (busy || Date.now() - last < 10000) return; busy = true; last = Date.now();
     var btn = document.getElementById("refresh"); btn.disabled = true;
     document.getElementById("status").textContent = "Refreshing";
     Promise.all(CH.map(function (c) { return readCount(c).then(function (v) { return v; }, function () { return null; }); }))
@@ -81,11 +83,12 @@ footer{margin-top:16px;color:#7a8394;font-size:.85rem}
         document.getElementById("totalshare").textContent = failed === CH.length ? "" : "100%";
         document.getElementById("status").textContent = "Last updated: " + ukTime(new Date()) + (failed ? " (" + failed + " unavailable)" : "");
       })
-      .then(function () { busy = false; btn.disabled = false; }, function () { busy = false; btn.disabled = false; });
+      .then(done, done);
+    function done() { busy = false; setTimeout(function () { btn.disabled = false; }, Math.max(0, 10000 - (Date.now() - last))); }
   }
   document.getElementById("refresh").addEventListener("click", refresh);
   refresh();
-  setInterval(refresh, 30000);
+  setInterval(function () { last = 0; refresh(); }, 30000);
 })();
 </script>
 </body>
