@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title>BiteLabs referral link clicks</title>
+<style>
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:#f6f7f9;color:#1d2433}
+main{max-width:760px;margin:40px auto;padding:0 16px}
+h1{font-size:1.4rem;margin:0 0 4px}
+p.sub{margin:0 0 20px;color:#5b6475;font-size:.95rem}
+.card{background:#fff;border:1px solid #e3e6eb;border-radius:10px;overflow:hidden}
+table{width:100%;border-collapse:collapse;font-size:.95rem}
+th,td{padding:10px 14px;text-align:left;border-bottom:1px solid #eef0f3}
+th{background:#1d2433;color:#fff;font-weight:600}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+tr.total td{font-weight:700;background:#f0f2f5;border-bottom:0}
+td.na{color:#b3261e}
+a{color:#0b57d0;text-decoration:none}
+.bar{display:flex;align-items:center;gap:12px;margin:16px 0;flex-wrap:wrap}
+button{background:#1d2433;color:#fff;border:0;border-radius:6px;padding:8px 16px;font-size:.95rem;cursor:pointer}
+button:disabled{opacity:.6;cursor:default}
+#status{color:#5b6475;font-size:.9rem}
+footer{margin-top:16px;color:#7a8394;font-size:.85rem}
+</style>
+</head>
+<body>
+<main>
+<h1>BiteLabs referral link clicks</h1>
+<p class="sub">Konovo / InCrowd referral short links. Counts refresh automatically every 30 seconds.</p>
+<div class="bar"><button id="refresh" type="button">Refresh</button><span id="status">Loading</span></div>
+<div class="card">
+<table>
+<thead><tr><th>Channel</th><th>Short link</th><th class="n">Clicks</th><th class="n">Share of total</th></tr></thead>
+<tbody>
+<tr data-ch="linkedin"><td>LinkedIn</td><td><a href="https://bitelabs-events.github.io/go/linkedin/" rel="nofollow">/go/linkedin/</a></td><td class="n">loading</td><td class="n">&nbsp;</td></tr>
+<tr data-ch="newsletter"><td>Newsletter</td><td><a href="https://bitelabs-events.github.io/go/newsletter/" rel="nofollow">/go/newsletter/</a></td><td class="n">loading</td><td class="n">&nbsp;</td></tr>
+<tr data-ch="insiders"><td>Insiders</td><td><a href="https://bitelabs-events.github.io/go/insiders/" rel="nofollow">/go/insiders/</a></td><td class="n">loading</td><td class="n">&nbsp;</td></tr>
+<tr data-ch="whatsapp"><td>WhatsApp</td><td><a href="https://bitelabs-events.github.io/go/whatsapp/" rel="nofollow">/go/whatsapp/</a></td><td class="n">loading</td><td class="n">&nbsp;</td></tr>
+<tr data-ch="slack"><td>Slack</td><td><a href="https://bitelabs-events.github.io/go/slack/" rel="nofollow">/go/slack/</a></td><td class="n">loading</td><td class="n">&nbsp;</td></tr>
+<tr data-ch="email"><td>Email</td><td><a href="https://bitelabs-events.github.io/go/email/" rel="nofollow">/go/email/</a></td><td class="n">loading</td><td class="n">&nbsp;</td></tr>
+<tr data-ch="events"><td>Events</td><td><a href="https://bitelabs-events.github.io/go/events/" rel="nofollow">/go/events/</a></td><td class="n">loading</td><td class="n">&nbsp;</td></tr>
+<tr data-ch="other"><td>Other</td><td><a href="https://bitelabs-events.github.io/go/other/" rel="nofollow">/go/other/</a></td><td class="n">loading</td><td class="n">&nbsp;</td></tr>
+<tr data-ch="fellowship"><td>Fellowship</td><td><a href="https://bitelabs-events.github.io/go/fellowship/" rel="nofollow">/go/fellowship/</a></td><td class="n">loading</td><td class="n">&nbsp;</td></tr>
+<tr class="total"><td>Total</td><td></td><td class="n" id="total">loading</td><td class="n" id="totalshare">&nbsp;</td></tr>
+</tbody>
+</table>
+</div>
+<footer>Clicks are counted when a short link is opened. Bots and link previews are not counted. Opening this page does not add any clicks.</footer>
+</main>
+<script>
+(function () {
+  var NS = "bitelabs-kv-e692d9dffd4789a3";
+  var CH = ["linkedin", "newsletter", "insiders", "whatsapp", "slack", "email", "events", "other", "fellowship"];
+  var busy = false;
+  function readCount(c) {
+    return fetch("https://abacus.jasoncameron.dev/get/" + NS + "/" + c, { method: "GET", mode: "cors", credentials: "omit", cache: "no-store" })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (d) { if (typeof d.value !== "number") throw new Error("bad"); return d.value; });
+  }
+  function ukTime(d) {
+    return d.toLocaleString("en-GB", { timeZone: "Europe/London", day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit", timeZoneName: "short" });
+  }
+  function pct(n, t) { return t > 0 ? (n / t * 100).toFixed(1) + "%" : "0.0%"; }
+  function refresh() {
+    if (busy) return; busy = true;
+    var btn = document.getElementById("refresh"); btn.disabled = true;
+    document.getElementById("status").textContent = "Refreshing";
+    Promise.all(CH.map(function (c) { return readCount(c).then(function (v) { return v; }, function () { return null; }); }))
+      .then(function (vals) {
+        var total = 0, failed = 0;
+        vals.forEach(function (v) { if (v === null) failed++; else total += v; });
+        CH.forEach(function (c, i) {
+          var tds = document.querySelector('tr[data-ch="' + c + '"]').children, v = vals[i];
+          if (v === null) { tds[2].textContent = "unavailable"; tds[2].className = "n na"; tds[3].textContent = "unavailable"; tds[3].className = "n na"; }
+          else { tds[2].textContent = v.toLocaleString("en-GB"); tds[2].className = "n"; tds[3].textContent = pct(v, total); tds[3].className = "n"; }
+        });
+        var te = document.getElementById("total");
+        te.textContent = failed === CH.length ? "unavailable" : total.toLocaleString("en-GB") + (failed ? " (excluding unavailable rows)" : "");
+        document.getElementById("totalshare").textContent = failed === CH.length ? "" : "100%";
+        document.getElementById("status").textContent = "Last updated: " + ukTime(new Date()) + (failed ? " (" + failed + " unavailable)" : "");
+      })
+      .then(function () { busy = false; btn.disabled = false; }, function () { busy = false; btn.disabled = false; });
+  }
+  document.getElementById("refresh").addEventListener("click", refresh);
+  refresh();
+  setInterval(refresh, 30000);
+})();
+</script>
+</body>
+</html>
