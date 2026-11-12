@@ -43,6 +43,7 @@ footer{margin-top:16px;color:#7a8394;font-size:.85rem}
 <tr data-ch="events"><td>Events</td><td><a href="https://bitelabs-events.github.io/go/events/" rel="nofollow">/go/events/</a></td><td class="n">loading</td><td class="n">&nbsp;</td></tr>
 <tr data-ch="other"><td>Other</td><td><a href="https://bitelabs-events.github.io/go/other/" rel="nofollow">/go/other/</a></td><td class="n">loading</td><td class="n">&nbsp;</td></tr>
 <tr data-ch="fellowship"><td>Fellowship</td><td><a href="https://bitelabs-events.github.io/go/fellowship/" rel="nofollow">/go/fellowship/</a></td><td class="n">loading</td><td class="n">&nbsp;</td></tr>
+<tr data-ch="webinar"><td>Webinar</td><td><a href="https://bitelabs-events.github.io/go/webinar/" rel="nofollow">/go/webinar/</a></td><td class="n">loading</td><td class="n">&nbsp;</td></tr>
 <tr class="total"><td>Total</td><td></td><td class="n" id="total">loading</td><td class="n" id="totalshare">&nbsp;</td></tr>
 </tbody>
 </table>
@@ -52,7 +53,7 @@ footer{margin-top:16px;color:#7a8394;font-size:.85rem}
 <script>
 (function () {
   var NS = "bitelabs-kv-e692d9dffd4789a3";
-  var CH = ["linkedin", "newsletter", "bitepaces", "whatsapp", "slack", "email", "events", "other", "fellowship"];
+  var CH = ["linkedin", "newsletter", "bitepaces", "whatsapp", "slack", "email", "events", "other", "fellowship", "webinar"];
   var busy = false;
   function readCount(c) {
     return fetch("https://abacus.jasoncameron.dev/get/" + NS + "/" + c, { method: "GET", mode: "cors", credentials: "omit", cache: "no-store" })
